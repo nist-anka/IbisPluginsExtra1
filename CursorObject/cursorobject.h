@@ -32,6 +32,7 @@ protected:
     vtkSmartPointer<vtkProperty> m_cursorProperty;
     vtkSmartPointer<vtkActor> m_cursorActor;
     vtkSmartPointer<vtkPolyDataMapper> m_cursorMapper;
+    double m_cursorPosition[3];
 
     CursorObject();
     virtual ~CursorObject();

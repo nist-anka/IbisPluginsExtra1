@@ -7,9 +7,11 @@
 #include <vtkPoints.h>
 #include <vtkCellArray.h>
 #include <vtkPolyData.h>
+#include <vtkImageData.h>
 #include <vtkProperty.h>
 #include <vtkActor.h>
 #include <vtkPolyDataMapper.h>
+#include "vtkMath.h"
 
 CursorObject::CursorObject()
 {
@@ -17,6 +19,8 @@ CursorObject::CursorObject()
     m_cursorPolyData = vtkSmartPointer<vtkPolyData>::New();
     this->SetPolyData( m_cursorPolyData );
     this->CreateCursorRepresentation();
+    this->SetListable( false );
+    this->SetName( "Cursor" );
 }
 
 CursorObject::~CursorObject()
@@ -68,22 +72,31 @@ void CursorObject::CreateCursorRepresentation()
     m_cursorActor = vtkSmartPointer<vtkActor>::New();
     m_cursorActor->SetProperty( m_cursorProperty );
     m_cursorActor->SetMapper( m_cursorMapper );
-    m_cursorActor->PickableOff();
+    m_cursorActor->PickableOn();
 }
 
 void CursorObject::Update()
 {
+    ImageObject* ref =  m_ibisAPI->GetReferenceDataObject();
+    vtkImageData *img = ref->GetImage();
+    double bounds[6], origin[3];
+    img->GetBounds( bounds );
+    img->GetOrigin( origin );
+    m_ibisAPI->GetCursorPosition( m_cursorPosition );
+#if 1
     double p1[3];
-    this->PlaneSource->GetPoint1(p1);
+    p1[0] = bounds[0];
+    p1[1] = bounds[2];
+    p1[2] = bounds[5];
     double p2[3];
-    this->PlaneSource->GetPoint2(p2);
-    double o[3];
-    this->PlaneSource->GetOrigin(o);
+    p2[0] = bounds[0];
+    p2[1] = bounds[3];
+    p2[2] = bounds[4];
 
     double d1[3];
-    vtkMath::Subtract( p1, o, d1 );
+    vtkMath::Subtract( p1, origin, d1 );
     double d2[3];
-    vtkMath::Subtract( p2, o, d2 );
+    vtkMath::Subtract( p2, origin, d2 );
 
     double a[3];
     double b[3];
@@ -92,25 +105,29 @@ void CursorObject::Update()
 
     for( int i = 0; i < 3; i++)
     {
-        a[i] = o[i]  + this->CursorPosition[1] * d2[i];   // left
-        b[i] = p1[i] + this->CursorPosition[1] * d2[i];   // right
-        c[i] = o[i]  + this->CursorPosition[0] * d1[i];   // bottom
-        d[i] = p2[i] + this->CursorPosition[0] * d1[i];   // top
+        a[i] = origin[i]  + m_cursorPosition[i] * d2[i];   // left
+        b[i] = p1[i] + m_cursorPosition[i] * d2[i];   // right
+        c[i] = origin[i]  + m_cursorPosition[i] * d1[i];   // bottom
+        d[i] = p2[i] + m_cursorPosition[i] * d1[i];   // top
     }
 
-    vtkPoints * cursorPts = this->CursorPolyData->GetPoints();
+    vtkPoints * cursorPts = m_cursorPolyData->GetPoints();
 
     cursorPts->SetPoint(0,a);
     cursorPts->SetPoint(1,b);
     cursorPts->SetPoint(2,c);
     cursorPts->SetPoint(3,d);
+#endif
 
-    this->CursorPolyData->Modified();}
+    this->m_cursorPolyData->Modified();
+}
 
 void CursorObject::SetIbisAPI( IbisAPI * api )
 {
     m_ibisAPI = api;
     ImageObject* ref =  m_ibisAPI->GetReferenceDataObject();
-    m_ibisAPI->AddObject( this, ref );
+    m_ibisAPI->AddObject( this );
+    this->SetLocalTransform( ref->GetWorldTransform() );
     connect( m_ibisAPI, SIGNAL( CursorPositionChanged() ), this, SLOT( Update() ) );
+    this->Update();
 }
