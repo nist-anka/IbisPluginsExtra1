@@ -26,6 +26,22 @@ CursorObject::~CursorObject()
 
 }
 
+void CursorObject::Serialize( Serializer * ser )
+{
+
+}
+
+void CursorObject::Setup( View * view )
+{
+
+}
+
+void CursorObject::Release( View * view )
+{
+
+}
+
+
 void CursorObject::Update()
 {
 }
