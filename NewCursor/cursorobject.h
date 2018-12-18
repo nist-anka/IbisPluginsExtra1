@@ -5,12 +5,12 @@
 #include <QObject>
 #include <QVector>
 #include <QList>
+#include <QColor>
 #include "sceneobject.h"
 #include "serializer.h"
 #include <vtkSmartPointer.h>
 
 class IbisAPI;
-class QColor;
 
 class CursorObject : public SceneObject
 {

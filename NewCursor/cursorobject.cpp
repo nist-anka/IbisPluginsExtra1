@@ -4,7 +4,6 @@
 
 #include <QFileDialog>
 #include <QString>
-#include <QColor>
 #include <vtkPoints.h>
 #include <vtkCellArray.h>
 #include <vtkPolyData.h>
