@@ -11,6 +11,7 @@
 #include <vtkSmartPointer.h>
 
 class IbisAPI;
+class View;
 
 class CursorObject : public SceneObject
 {
@@ -28,7 +29,7 @@ public:
 
     void SetIbisAPI( IbisAPI * api );
     void SetCursorColor( const QColor & c );
-    QColor GetCursorColor();
+    QColor GetCursorColor() { return m_cursorColor; }
 
 public slots:
     void Update();

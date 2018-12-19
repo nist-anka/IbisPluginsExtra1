@@ -1,6 +1,7 @@
 #include "cursorobject.h"
 #include "ibisapi.h"
 #include "imageobject.h"
+#include "view.h"
 
 #include <QFileDialog>
 #include <QString>
@@ -33,14 +34,13 @@ void CursorObject::Serialize( Serializer * ser )
 
 void CursorObject::Setup( View * view )
 {
-
+    SceneObject::Setup( view );
 }
 
 void CursorObject::Release( View * view )
 {
-
+    SceneObject::Release( view );
 }
-
 
 void CursorObject::Update()
 {
@@ -58,9 +58,5 @@ void CursorObject::SetIbisAPI( IbisAPI * api )
 void CursorObject::SetCursorColor( const QColor & c )
 {
     m_cursorColor = c;
-}
-
-QColor CursorObject::GetCursorColor()
-{
-    return m_cursorColor;
+    m_ibisAPI->SetCursorColor( m_cursorColor );
 }
