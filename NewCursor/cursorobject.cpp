@@ -31,26 +31,28 @@ CursorObject::~CursorObject()
 void CursorObject::Serialize( Serializer * ser )
 {
     ser->BeginSection("GlobalCursor");
+    SceneObject::Serialize(ser);
+    ::Serialize( ser, "CursorLineThickness", m_cursorLineThickness );
     if( ser->IsReader() )
     {
         QColor cursorColor = this->GetCursorColor();
         int color;
-        if( ::Serialize( &ser, "CursorColor_r", color ) )
+        if( ::Serialize( ser, "CursorColor_r", color ) )
             cursorColor.setRed( color );
-        if( ::Serialize( &ser, "CursorColor_g", color ) )
+        if( ::Serialize( ser, "CursorColor_g", color ) )
                 cursorColor.setGreen( color );
-        if( ::Serialize( &ser, "CursorColor_b", color ) )
+        if( ::Serialize( ser, "CursorColor_b", color ) )
                 cursorColor.setBlue( color );
         this->SetCursorColor( cursorColor );
     }
     else
     {
         int color = this->GetCursorColor().red();
-        ::Serialize( &ser, "CursorColor_r", color );
+        ::Serialize( ser, "CursorColor_r", color );
         color = this->GetCursorColor().green();
-        ::Serialize( &ser, "CursorColor_g", color );
+        ::Serialize( ser, "CursorColor_g", color );
         color = this->GetCursorColor().blue();
-        ::Serialize( &ser, "CursorColor_b", color );
+        ::Serialize( ser, "CursorColor_b", color );
     }
     ser->EndSection();
 }
