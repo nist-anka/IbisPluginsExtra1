@@ -2,7 +2,6 @@
 #define CURSOROBJECT_H
 
 #include <QObject>
-#include <QObject>
 #include <QVector>
 #include <QList>
 #include <QColor>
@@ -30,6 +29,8 @@ public:
     void SetIbisAPI( IbisAPI * api );
     void SetCursorColor( const QColor & c );
     QColor GetCursorColor() { return m_cursorColor; }
+    void SetCursorLineThickness( int s );
+    int GetCursorLineThickness() { return m_cursorLineThickness; }
 
 public slots:
     void Update();
@@ -38,6 +39,9 @@ protected:
     IbisAPI *m_ibisAPI;
     QColor m_cursorColor;
     int m_cursorLineThickness;
+
+    virtual void ObjectAddedToScene() override;
+    virtual void ObjectAboutToBeRemovedFromScene() override;
 
     CursorObject();
     virtual ~CursorObject();
