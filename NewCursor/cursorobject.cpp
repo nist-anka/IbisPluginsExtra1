@@ -70,7 +70,10 @@ void CursorObject::Setup( View * view )
     perView.cursorActor = vtkSmartPointer<vtkActor>::New();
     perView.cursorActor->SetMapper( cursorMapper );
 //    perView.cursorActor->SetUserTransform();
-    view->GetRenderer()->AddActor( perView.cursorActor );
+    if( view->GetType() == THREED_VIEW_TYPE )
+        view->GetRenderer()->AddActor( perView.cursorActor );
+    else
+        view->GetOverlayRenderer()->AddActor( perView.cursorActor );
 }
 
 void CursorObject::Release( View * view )
