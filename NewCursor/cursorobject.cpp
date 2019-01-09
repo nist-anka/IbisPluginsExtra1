@@ -11,6 +11,7 @@
 #include <vtkPolyData.h>
 #include <vtkImageData.h>
 #include <vtkProperty.h>
+#include <vtkRenderer.h>
 #include <vtkActor.h>
 #include <vtkPolyDataMapper.h>
 #include "vtkMath.h"
@@ -21,6 +22,7 @@ CursorObject::CursorObject()
     this->SetListable( false );
     this->SetName( "Cursor" );
     m_cursorLineThickness = 1;
+    CreateCursorRepresentation();
 }
 
 CursorObject::~CursorObject()
@@ -59,16 +61,22 @@ void CursorObject::Serialize( Serializer * ser )
 
 void CursorObject::Setup( View * view )
 {
+    view->AddInteractionObject( this, 0.5 );
     SceneObject::Setup( view );
+
+    PerViewElements perView;
+    vtkSmartPointer<vtkPolyDataMapper> cursorMapper = vtkSmartPointer<vtkPolyDataMapper>::New();
+    cursorMapper->SetInputData( m_cursorPolyData );
+    perView.cursorActor = vtkSmartPointer<vtkActor>::New();
+    perView.cursorActor->SetMapper( cursorMapper );
+//    perView.cursorActor->SetUserTransform();
+    view->GetRenderer()->AddActor( perView.cursorActor );
 }
 
 void CursorObject::Release( View * view )
 {
+    view->RemoveInteractionObject(this);
     SceneObject::Release( view );
-}
-
-void CursorObject::Update()
-{
 }
 
 void CursorObject::SetIbisAPI( IbisAPI * api )
@@ -78,6 +86,32 @@ void CursorObject::SetIbisAPI( IbisAPI * api )
     connect( m_ibisAPI, SIGNAL( CursorPositionChanged() ), this, SLOT( Update() ) );
     this->SetCursorColor( m_ibisAPI->GetCursorColor() );
     this->Update();
+}
+
+
+void CursorObject::Update()
+{
+}
+
+void CursorObject::CreateCursorRepresentation()
+{
+    vtkSmartPointer<vtkPoints> pts = vtkSmartPointer<vtkPoints>::New();
+    pts->InsertNextPoint( -100.0, 0.0, 0.0 );
+    pts->InsertNextPoint( 100.0, 0.0, 0.0 );
+    pts->InsertNextPoint( 0.0, -100.0, 0.0 );
+    pts->InsertNextPoint( 0.0, 100.0, 0.0 );
+    pts->InsertNextPoint( 0.0, 0.0, -100.0 );
+    pts->InsertNextPoint( 0.0, 0.0, 100.0 );
+
+    static vtkIdType linesIndex[3][2]= { {0,1}, {2,3}, {4,5} };
+    vtkSmartPointer<vtkCellArray> lines = vtkSmartPointer<vtkCellArray>::New();
+    for( int i = 0; i < 3; ++i )
+        lines->InsertNextCell( 2, linesIndex[i] );
+
+    m_cursorPolyData = vtkSmartPointer<vtkPolyData>::New();
+    m_cursorPolyData->SetPoints( pts );
+    m_cursorPolyData->SetLines( lines );
+
 }
 
 void CursorObject::SetCursorColor( const QColor & c )

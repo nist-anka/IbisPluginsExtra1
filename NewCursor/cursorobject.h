@@ -11,6 +11,8 @@
 
 class IbisAPI;
 class View;
+class vtkActor;
+class vtkPolyData;
 
 class CursorObject : public SceneObject
 {
@@ -39,7 +41,16 @@ protected:
     IbisAPI *m_ibisAPI;
     QColor m_cursorColor;
     int m_cursorLineThickness;
+    vtkSmartPointer<vtkPolyData> m_cursorPolyData;
 
+    struct PerViewElements
+    {
+        PerViewElements() {};
+        ~PerViewElements() {};
+        vtkSmartPointer<vtkActor> cursorActor;
+    };
+
+    void CreateCursorRepresentation();
     virtual void ObjectAddedToScene() override;
     virtual void ObjectAboutToBeRemovedFromScene() override;
 
