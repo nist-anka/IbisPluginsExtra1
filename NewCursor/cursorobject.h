@@ -13,6 +13,8 @@ class IbisAPI;
 class View;
 class vtkActor;
 class vtkPolyData;
+class vtkProperty;
+class vtkPolyDataMapper;
 
 class CursorObject : public SceneObject
 {
@@ -28,7 +30,7 @@ public:
     virtual void Release( View * view ) override;
 
 
-    void SetIbisAPI( IbisAPI * api );
+//    void SetIbisAPI( IbisAPI * api );
     void SetCursorColor( const QColor & c );
     QColor GetCursorColor() { return m_cursorColor; }
     void SetCursorLineThickness( int s );
@@ -38,7 +40,6 @@ public slots:
     void Update();
 
 protected:
-    IbisAPI *m_ibisAPI;
     QColor m_cursorColor;
     int m_cursorLineThickness;
     vtkSmartPointer<vtkPolyData> m_cursorPolyData;
@@ -48,7 +49,13 @@ protected:
         PerViewElements() {};
         ~PerViewElements() {};
         vtkSmartPointer<vtkActor> cursorActor;
+        vtkSmartPointer<vtkPolyDataMapper> cursorMapper;
     };
+    typedef std::map< View*, PerViewElements* > PerViewContainer;
+    PerViewContainer m_perViewContainer;
+
+    // Property used to control the appearance of the cursor
+    vtkSmartPointer<vtkProperty> m_property;
 
     void CreateCursorRepresentation();
     virtual void ObjectAddedToScene() override;

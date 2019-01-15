@@ -1,5 +1,4 @@
 #include "cursorobject.h"
-#include "ibisapi.h"
 #include "imageobject.h"
 #include "scenemanager.h"
 #include "view.h"
@@ -18,10 +17,13 @@
 
 CursorObject::CursorObject()
 {
-    m_ibisAPI = nullptr;
     this->SetListable( false );
     this->SetName( "Cursor" );
     m_cursorLineThickness = 1;
+    m_property = vtkSmartPointer<vtkProperty>::New();
+    m_property->SetColor(1.0,0.0,0.0);
+    m_property->SetAmbient(1);
+    m_property->SetLineWidth(1);
     CreateCursorRepresentation();
 }
 
@@ -64,36 +66,58 @@ void CursorObject::Setup( View * view )
     view->AddInteractionObject( this, 0.5 );
     SceneObject::Setup( view );
 
-    PerViewElements perView;
-    vtkSmartPointer<vtkPolyDataMapper> cursorMapper = vtkSmartPointer<vtkPolyDataMapper>::New();
-    cursorMapper->SetInputData( m_cursorPolyData );
-    perView.cursorActor = vtkSmartPointer<vtkActor>::New();
-    perView.cursorActor->SetMapper( cursorMapper );
-//    perView.cursorActor->SetUserTransform();
+    PerViewElements * perView = new PerViewElements;
+    perView->cursorMapper = vtkSmartPointer<vtkPolyDataMapper>::New();
+    perView->cursorMapper->SetInputData( m_cursorPolyData );
+    perView->cursorActor = vtkSmartPointer<vtkActor>::New();
+    perView->cursorActor->SetMapper( perView->cursorMapper );
+    perView->cursorActor->SetProperty( m_property );
     if( view->GetType() == THREED_VIEW_TYPE )
-        view->GetRenderer()->AddActor( perView.cursorActor );
+        view->GetRenderer()->AddActor( perView->cursorActor );
     else
-        view->GetOverlayRenderer()->AddActor( perView.cursorActor );
+        view->GetOverlayRenderer()->AddActor( perView->cursorActor );
+    m_perViewContainer[view] = perView;
 }
 
 void CursorObject::Release( View * view )
 {
     view->RemoveInteractionObject(this);
+    PerViewContainer::iterator it = m_perViewContainer.find( view );
+    if( it != m_perViewContainer.end() )
+    {
+        PerViewElements * perView = (*it).second;
+        if( view->GetType() == THREED_VIEW_TYPE )
+        {
+            view->GetRenderer()->RemoveActor( perView->cursorActor );
+        }
+        else
+            view->GetOverlayRenderer()->RemoveActor( perView->cursorActor );
+        delete perView;
+        this->m_perViewContainer.erase( it );
+    }
     SceneObject::Release( view );
 }
 
-void CursorObject::SetIbisAPI( IbisAPI * api )
-{
-    m_ibisAPI = api;
-    m_ibisAPI->AddObject( this );
-    connect( m_ibisAPI, SIGNAL( CursorPositionChanged() ), this, SLOT( Update() ) );
-    this->SetCursorColor( m_ibisAPI->GetCursorColor() );
-    this->Update();
-}
-
-
 void CursorObject::Update()
 {
+    Q_ASSERT( GetManager() );
+    ImageObject *ref = GetManager()->GetReferenceDataObject();
+    vtkImageData *img = ref->GetImage();
+    double bounds[6];
+    img->GetBounds( bounds );
+    vtkPoints *pts = m_cursorPolyData->GetPoints();
+    double pos[3];
+    GetManager()->GetCursorPosition( pos );
+
+
+    PerViewContainer::iterator it = m_perViewContainer.begin();
+    while( it != m_perViewContainer.end() )
+    {
+        PerViewElements * perView = (*it).second;
+        perView->cursorMapper->Update();
+    }
+    this->SetCursorColor( GetManager()->GetCursorColor() );
+    this->Modified();
 }
 
 void CursorObject::CreateCursorRepresentation()
@@ -114,15 +138,18 @@ void CursorObject::CreateCursorRepresentation()
     m_cursorPolyData = vtkSmartPointer<vtkPolyData>::New();
     m_cursorPolyData->SetPoints( pts );
     m_cursorPolyData->SetLines( lines );
-
 }
 
 void CursorObject::SetCursorColor( const QColor & c )
 {
+    Q_ASSERT( GetManager() );
     m_cursorColor = c;
-    if( m_ibisAPI )
-        m_ibisAPI->SetCursorColor( m_cursorColor );
-}
+    double color[3];
+    color[0] = m_cursorColor.red() / 255.0;
+    color[1] = m_cursorColor.green() / 255.0;
+    color[2] = m_cursorColor.blue() / 255.0;
+    m_property->SetColor( color );
+ }
 
 void CursorObject::SetCursorLineThickness( int s )
 {
@@ -135,6 +162,7 @@ void CursorObject::ObjectAddedToScene()
     Q_ASSERT( GetManager() );
 
     connect( this->GetManager(), SIGNAL(CursorPositionChanged()), this, SLOT(Update()) );
+    this->Update();
 }
 
 void CursorObject::ObjectAboutToBeRemovedFromScene()
