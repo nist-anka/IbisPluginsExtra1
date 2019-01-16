@@ -41,7 +41,6 @@ public slots:
 protected:
     QColor m_cursorColor;
     int m_cursorLineThickness;
-    vtkSmartPointer<vtkPolyData> m_cursorPolyData;
 
     virtual void Hide() override;
     virtual void Show() override;
@@ -52,6 +51,7 @@ protected:
         ~PerViewElements() {}
         vtkSmartPointer<vtkActor> cursorActor;
         vtkSmartPointer<vtkPolyDataMapper> cursorMapper;
+        vtkSmartPointer<vtkPolyData> cursorPolyData;
     };
     typedef std::map< View*, PerViewElements* > PerViewContainer;
     PerViewContainer m_perViewContainer;
@@ -59,7 +59,9 @@ protected:
     // Property used to control the appearance of the cursor
     vtkSmartPointer<vtkProperty> m_property;
 
-    void CreateCursorRepresentation();
+    void CreateCursorRepresentation2D( int viewType, vtkPolyData* polyData );
+    void CreateCursorRepresentation3D(vtkPolyData* polyData );
+    void ComputeLinesEnds(double endPoints[6][3] );
     virtual void ObjectAddedToScene() override;
     virtual void ObjectAboutToBeRemovedFromScene() override;
 

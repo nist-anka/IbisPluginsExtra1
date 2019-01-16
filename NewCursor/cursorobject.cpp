@@ -24,7 +24,6 @@ CursorObject::CursorObject()
     m_property->SetColor(1.0,0.0,0.0);
     m_property->SetAmbient(1);
     m_property->SetLineWidth(1);
-    CreateCursorRepresentation();
 }
 
 CursorObject::~CursorObject()
@@ -69,8 +68,14 @@ void CursorObject::Setup( View * view )
     SceneObject::Setup( view );
 
     PerViewElements * perView = new PerViewElements;
+    perView->cursorPolyData = vtkSmartPointer<vtkPolyData>::New();
+    if( view->GetType() == THREED_VIEW_TYPE )
+        this->CreateCursorRepresentation3D( perView->cursorPolyData );
+    else
+        this->CreateCursorRepresentation2D( view->GetType(), perView->cursorPolyData );
+
     perView->cursorMapper = vtkSmartPointer<vtkPolyDataMapper>::New();
-    perView->cursorMapper->SetInputData( m_cursorPolyData );
+    perView->cursorMapper->SetInputData( perView->cursorPolyData );
     perView->cursorActor = vtkSmartPointer<vtkActor>::New();
     perView->cursorActor->SetMapper( perView->cursorMapper );
     perView->cursorActor->SetProperty( m_property );
@@ -128,15 +133,6 @@ void CursorObject::Show()
 void CursorObject::Update()
 {
     Q_ASSERT( GetManager() );
-    ImageObject *ref = GetManager()->GetReferenceDataObject();
-    vtkImageData *img = ref->GetImage();
-    double bounds[6];
-    img->GetBounds( bounds );
-    vtkPoints *pts = m_cursorPolyData->GetPoints();
-    double pos[3];
-    GetManager()->GetCursorPosition( pos );
-
-
     PerViewContainer::iterator it = m_perViewContainer.begin();
     while( it != m_perViewContainer.end() )
     {
@@ -146,24 +142,95 @@ void CursorObject::Update()
     this->ObjectModified();
 }
 
-void CursorObject::CreateCursorRepresentation()
+void CursorObject::ComputeLinesEnds( double endPoints[6][3] )
 {
+    Q_ASSERT( GetManager() );
+    ImageObject *ref = GetManager()->GetReferenceDataObject();
+    Q_ASSERT( ref );
+    vtkImageData *img = ref->GetImage();
+    double bounds[6];
+    double position[3];
+    img->GetBounds( bounds );
+    GetManager()->GetCursorPosition( position );
+    // line along x
+    endPoints[0][0] = bounds[0];
+    endPoints[0][1] = position[1];
+    endPoints[0][2] = position[2];
+    endPoints[1][0] = bounds[1];
+    endPoints[1][1] = position[1];
+    endPoints[1][2] = position[2];
+    // line along y
+    endPoints[2][0] = position[0];
+    endPoints[2][1] = bounds[2];
+    endPoints[2][2] = position[2];
+    endPoints[3][0] = position[0];
+    endPoints[3][1] = bounds[3];
+    endPoints[3][2] = position[2];
+    // line along z
+    endPoints[4][0] = position[0];
+    endPoints[4][1] = position[1];
+    endPoints[4][2] = bounds[4];
+    endPoints[5][0] = position[0];
+    endPoints[5][1] = position[1];
+    endPoints[5][2] = bounds[5];
+}
+
+void CursorObject::CreateCursorRepresentation2D( int viewType, vtkPolyData* polyData )
+{
+    double endPoints[6][3];
+    ComputeLinesEnds( endPoints );
     vtkSmartPointer<vtkPoints> pts = vtkSmartPointer<vtkPoints>::New();
-    pts->InsertNextPoint( -100.0, 0.0, 0.0 );
-    pts->InsertNextPoint( 100.0, 0.0, 0.0 );
-    pts->InsertNextPoint( 0.0, -100.0, 0.0 );
-    pts->InsertNextPoint( 0.0, 100.0, 0.0 );
-    pts->InsertNextPoint( 0.0, 0.0, -100.0 );
-    pts->InsertNextPoint( 0.0, 0.0, 100.0 );
+    switch( viewType )
+    {
+        case SAGITTAL_VIEW_TYPE: //plane y and z
+            pts->InsertNextPoint( endPoints[2][0], endPoints[2][1], endPoints[2][2] );
+            pts->InsertNextPoint( endPoints[3][0], endPoints[3][1], endPoints[3][2] );
+            pts->InsertNextPoint( endPoints[4][0], endPoints[4][1], endPoints[4][2] );
+            pts->InsertNextPoint( endPoints[5][0], endPoints[5][1], endPoints[5][2] );
+            break;
+        case CORONAL_VIEW_TYPE: // plane x and z
+            pts->InsertNextPoint( endPoints[0][0], endPoints[0][1], endPoints[0][2] );
+            pts->InsertNextPoint( endPoints[1][0], endPoints[1][1], endPoints[1][2] );
+            pts->InsertNextPoint( endPoints[4][0], endPoints[4][1], endPoints[4][2] );
+            pts->InsertNextPoint( endPoints[5][0], endPoints[5][1], endPoints[5][2] );
+            break;
+        default: // plane x and y
+        case TRANSVERSE_VIEW_TYPE:
+            pts->InsertNextPoint( endPoints[0][0], endPoints[0][1], endPoints[0][2] );
+            pts->InsertNextPoint( endPoints[1][0], endPoints[1][1], endPoints[1][2] );
+            pts->InsertNextPoint( endPoints[2][0], endPoints[2][1], endPoints[2][2] );
+            pts->InsertNextPoint( endPoints[3][0], endPoints[3][1], endPoints[3][2] );
+            break;
+    }
+
+    static vtkIdType linesIndex[2][2]= { {0,1}, {2,3} };
+    vtkSmartPointer<vtkCellArray> lines = vtkSmartPointer<vtkCellArray>::New();
+    for( int i = 0; i < 2; ++i )
+        lines->InsertNextCell( 2, linesIndex[i] );
+
+    polyData->SetPoints( pts );
+    polyData->SetLines( lines );
+}
+
+void CursorObject::CreateCursorRepresentation3D( vtkPolyData * polyData )
+{
+    double endPoints[6][3];
+    ComputeLinesEnds( endPoints );
+    vtkSmartPointer<vtkPoints> pts = vtkSmartPointer<vtkPoints>::New();
+    pts->InsertNextPoint( endPoints[0][0], endPoints[0][1], endPoints[0][2] );
+    pts->InsertNextPoint( endPoints[1][0], endPoints[1][1], endPoints[1][2] );
+    pts->InsertNextPoint( endPoints[2][0], endPoints[2][1], endPoints[2][2] );
+    pts->InsertNextPoint( endPoints[3][0], endPoints[3][1], endPoints[3][2] );
+    pts->InsertNextPoint( endPoints[4][0], endPoints[4][1], endPoints[4][2] );
+    pts->InsertNextPoint( endPoints[5][0], endPoints[5][1], endPoints[5][2] );
 
     static vtkIdType linesIndex[3][2]= { {0,1}, {2,3}, {4,5} };
     vtkSmartPointer<vtkCellArray> lines = vtkSmartPointer<vtkCellArray>::New();
     for( int i = 0; i < 3; ++i )
         lines->InsertNextCell( 2, linesIndex[i] );
 
-    m_cursorPolyData = vtkSmartPointer<vtkPolyData>::New();
-    m_cursorPolyData->SetPoints( pts );
-    m_cursorPolyData->SetLines( lines );
+    polyData->SetPoints( pts );
+    polyData->SetLines( lines );
 }
 
 void CursorObject::SetCursorColor( const QColor & c )
@@ -188,13 +255,13 @@ void CursorObject::ObjectAddedToScene()
 {
     Q_ASSERT( GetManager() );
 
-    connect( this->GetManager(), SIGNAL(CursorPositionChanged()), this, SLOT(Update()) );
+//    connect( this->GetManager(), SIGNAL(CursorPositionChanged()), this, SLOT(Update()) );
     this->Update();
 }
 
 void CursorObject::ObjectAboutToBeRemovedFromScene()
 {
     Q_ASSERT( GetManager() );
-    disconnect( this->GetManager(), SIGNAL(CursorPositionChanged()), this, SLOT(Update()) );
+//    disconnect( this->GetManager(), SIGNAL(CursorPositionChanged()), this, SLOT(Update()) );
 }
 
