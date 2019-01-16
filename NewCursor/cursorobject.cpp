@@ -85,6 +85,7 @@ void CursorObject::Setup( View * view )
         view->GetOverlayRenderer()->AddActor( perView->cursorActor );
     m_perViewContainer[view] = perView;
     connect( this, SIGNAL(ObjectModified()), view, SLOT(NotifyNeedRender()) );
+    view->NotifyNeedRender();
 }
 
 void CursorObject::Release( View * view )
@@ -256,7 +257,7 @@ void CursorObject::ObjectAddedToScene()
     Q_ASSERT( GetManager() );
 
 //    connect( this->GetManager(), SIGNAL(CursorPositionChanged()), this, SLOT(Update()) );
-    this->Update();
+//    this->Update();
 }
 
 void CursorObject::ObjectAboutToBeRemovedFromScene()
