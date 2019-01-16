@@ -63,6 +63,8 @@ void CursorObject::Serialize( Serializer * ser )
 
 void CursorObject::Setup( View * view )
 {
+    Q_ASSERT( GetManager() );
+    this->SetCursorColor( GetManager()->GetCursorColor() );
     view->AddInteractionObject( this, 0.5 );
     SceneObject::Setup( view );
 
@@ -77,10 +79,12 @@ void CursorObject::Setup( View * view )
     else
         view->GetOverlayRenderer()->AddActor( perView->cursorActor );
     m_perViewContainer[view] = perView;
+    connect( this, SIGNAL(ObjectModified()), view, SLOT(NotifyNeedRender()) );
 }
 
 void CursorObject::Release( View * view )
 {
+    disconnect( this, SIGNAL(ObjectModified()), view, SLOT(NotifyNeedRender()) );
     view->RemoveInteractionObject(this);
     PerViewContainer::iterator it = m_perViewContainer.find( view );
     if( it != m_perViewContainer.end() )
@@ -97,6 +101,29 @@ void CursorObject::Release( View * view )
     }
     SceneObject::Release( view );
 }
+
+void CursorObject::Hide()
+{
+    PerViewContainer::iterator it = m_perViewContainer.begin();
+    while( it != m_perViewContainer.end() )
+    {
+        PerViewElements * perView = (*it).second;
+        perView->cursorActor->VisibilityOff();
+        ++it;
+    }
+}
+
+void CursorObject::Show()
+{
+    PerViewContainer::iterator it = m_perViewContainer.begin();
+    while( it != m_perViewContainer.end() )
+    {
+        PerViewElements * perView = (*it).second;
+        perView->cursorActor->VisibilityOn();
+        ++it;
+    }
+}
+
 
 void CursorObject::Update()
 {
@@ -116,8 +143,7 @@ void CursorObject::Update()
         PerViewElements * perView = (*it).second;
         perView->cursorMapper->Update();
     }
-    this->SetCursorColor( GetManager()->GetCursorColor() );
-    this->Modified();
+    this->ObjectModified();
 }
 
 void CursorObject::CreateCursorRepresentation()
@@ -149,12 +175,13 @@ void CursorObject::SetCursorColor( const QColor & c )
     color[1] = m_cursorColor.green() / 255.0;
     color[2] = m_cursorColor.blue() / 255.0;
     m_property->SetColor( color );
+    this->ObjectModified();
  }
 
 void CursorObject::SetCursorLineThickness( int s )
 {
     m_cursorLineThickness = s;
-    this->Update();
+    this->ObjectModified();
 }
 
 void CursorObject::ObjectAddedToScene()

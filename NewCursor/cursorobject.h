@@ -30,7 +30,6 @@ public:
     virtual void Release( View * view ) override;
 
 
-//    void SetIbisAPI( IbisAPI * api );
     void SetCursorColor( const QColor & c );
     QColor GetCursorColor() { return m_cursorColor; }
     void SetCursorLineThickness( int s );
@@ -44,10 +43,13 @@ protected:
     int m_cursorLineThickness;
     vtkSmartPointer<vtkPolyData> m_cursorPolyData;
 
+    virtual void Hide() override;
+    virtual void Show() override;
+
     struct PerViewElements
     {
-        PerViewElements() {};
-        ~PerViewElements() {};
+        PerViewElements() {}
+        ~PerViewElements() {}
         vtkSmartPointer<vtkActor> cursorActor;
         vtkSmartPointer<vtkPolyDataMapper> cursorMapper;
     };
