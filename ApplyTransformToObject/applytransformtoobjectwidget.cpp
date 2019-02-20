@@ -12,3 +12,13 @@ ApplyTransformToObjectWidget::~ApplyTransformToObjectWidget()
 {
     delete ui;
 }
+
+void ApplyTransformToObjectWidget::on_transformPushButton_clicked()
+{
+
+}
+
+void ApplyTransformToObjectWidget::on_applyPushButtonClicked()
+{
+
+}

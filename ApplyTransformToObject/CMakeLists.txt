@@ -1,10 +1,12 @@
 # define sources
 set( PluginSrc
-        applytransformtoobjectplugininterface.cpp
+        applytransformtoobjectplugininterface.cpp applytransformtoobjectwidget.cpp
 )
-set( PluginHdr applytransformtoobjectplugininterface.h )
+set( PluginHdr applytransformtoobjectplugininterface.h  applytransformtoobjectwidget.h )
 
-set( PluginHdrMoc applytransformtoobjectplugininterface.h )
+set( PluginHdrMoc applytransformtoobjectplugininterface.h applytransformtoobjectwidget.h)
+
+set( PluginUi applytransformtoobjectwidget.ui )
 
 
 # Create plugin

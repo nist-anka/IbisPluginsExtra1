@@ -4,6 +4,7 @@
 
 #include "toolplugininterface.h"
 
+class ApplyTransformToObjectWidget;
 
 class ApplyTransformToObjectPluginInterface : public ToolPluginInterface
 {
@@ -22,6 +23,10 @@ public:
     bool CanRun() { return true; }
     QString GetMenuEntryString() { return QString("Apply Transform to Object"); }
     QWidget * CreateFloatingWidget();
+
+
+protected:
+    ApplyTransformToObjectWidget * m_interfaceWidget;
 };
 
 #endif

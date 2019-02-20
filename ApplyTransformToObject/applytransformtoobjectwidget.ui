@@ -26,7 +26,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QComboBox" name="comboBox"/>
+        <widget class="QComboBox" name="sceneObjectsComboBox"/>
        </item>
       </layout>
      </item>
@@ -53,7 +53,7 @@
      <item>
       <widget class="QPushButton" name="applyPushButton">
        <property name="text">
-        <string>Apply Transforrm</string>
+        <string>Apply Transform</string>
        </property>
       </widget>
      </item>
