@@ -44,4 +44,16 @@ void SetPlanesWorldPositionWidget::UpdateUI()
 
 void SetPlanesWorldPositionWidget::on_applyPushButton_clicked()
 {
+    if( (ui->newXLineEdit->text().isNull() || ui->newYLineEdit->text().isNull() || ui->newYLineEdit->text().isNull() ) )
+        return;
+    if( (ui->newXLineEdit->text().isEmpty() || ui->newYLineEdit->text().isEmpty() || ui->newYLineEdit->text().isEmpty() ) )
+        return;
+    Q_ASSERT(m_pluginInterface);
+    IbisAPI *ibisAPI = m_pluginInterface->GetIbisAPI();
+    Q_ASSERT(ibisAPI);
+    double newPos[3];
+    newPos[0] = ui->newXLineEdit->text().toDouble();
+    newPos[1] = ui->newYLineEdit->text().toDouble();
+    newPos[2] = ui->newZLineEdit->text().toDouble();
+    ibisAPI->SetCursorWorldPosition( newPos );
 }
