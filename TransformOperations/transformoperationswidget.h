@@ -23,8 +23,12 @@ public:
 
 private slots:
 
-//    void on_transformPushButton_clicked();
-//    void on_sceneObjectsComboBox_currentIndexChanged(int index);
+    void on_identityPushButton_clicked();
+    void on_concat1PushButton_clicked();
+    void on_concat2PushButton_clicked();
+    void on_inversePushButton_clicked();
+    void on_inputPushButton_clicked();
+    void on_inputConcat2PushButton_clicked();
     void EditMatrixDialogClosed();
     void UpdateUI();
 

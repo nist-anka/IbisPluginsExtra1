@@ -28,8 +28,8 @@ TransformOperationsWidget::~TransformOperationsWidget()
     delete ui;
 }
 
-//void TransformOperationsWidget::on_transformPushButton_clicked()
-//{
+void TransformOperationsWidget::on_identityPushButton_clicked()
+{
 //    Q_ASSERT(m_selectedObject);
 //    vtkTransform * localTransform = m_selectedObject->GetLocalTransform();
 //    bool readOnly = !m_selectedObject->CanEditTransformManually();
@@ -40,14 +40,33 @@ TransformOperationsWidget::~TransformOperationsWidget()
 //    m_matrixDialog->show();
 //    connect( m_matrixDialog, SIGNAL(MatrixModified()), m_selectedObject, SLOT(NotifyTransformChanged()) );
 //    connect( m_matrixDialog, SIGNAL(destroyed()), this, SLOT(EditMatrixDialogClosed()) );
-//}
+}
 
-//void TransformOperationsWidget::on_sceneObjectsComboBox_currentIndexChanged(int index)
-//{
-//    int objectId = GuiUtilities::ObjectIdFromObjectComboBox( ui->sceneObjectsComboBox, index );
-//    Q_ASSERT( objectId > IbisAPI::InvalidId );
-//    m_selectedObject = m_pluginInterface->GetIbisAPI()->GetObjectByID( objectId );
-//}
+void TransformOperationsWidget::on_concat1PushButton_clicked()
+{
+
+}
+
+void TransformOperationsWidget::on_concat2PushButton_clicked()
+{
+
+}
+
+void TransformOperationsWidget::on_inversePushButton_clicked()
+{
+
+}
+
+void TransformOperationsWidget::on_inputPushButton_clicked()
+{
+
+}
+
+void TransformOperationsWidget::on_inputConcat2PushButton_clicked()
+{
+
+}
+
 
 void TransformOperationsWidget::SetInterface( TransformOperationsPluginInterface *intface )
 {

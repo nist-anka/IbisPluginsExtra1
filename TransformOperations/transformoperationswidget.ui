@@ -93,7 +93,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="iconcat1PushButton">
+         <widget class="QPushButton" name="concat1PushButton">
           <property name="text">
            <string>Concatenate</string>
           </property>
