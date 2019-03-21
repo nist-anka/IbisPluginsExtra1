@@ -84,9 +84,26 @@ void TransformOperationsWidget::UpdateUI()
     ibisAPI->GetAllUserObjects( objects );
     GuiUtilities::UpdateSceneObjectComboBox( ui->sceneObjectsComboBox, objects, ibisAPI->GetCurrentObject()->GetObjectID() );
     m_selectedObject = ibisAPI->GetCurrentObject();
+    if( m_selectedObject == nullptr )
+        return;
+    QString temp;
+    this->MatrixToString( m_selectedObject->GetWorldTransform()->GetMatrix(), temp );
+    ui->baseTextEdit->setText( temp );
 }
 
 void TransformOperationsWidget::EditMatrixDialogClosed()
 {
     m_matrixDialog = 0;
+}
+
+const void TransformOperationsWidget::MatrixToString(const vtkMatrix4x4 *mat , QString &formattedOutput )
+{
+    formattedOutput.clear();
+    QString tmp;
+    for( int i = 0; i < 3; i++ )
+    {
+        tmp.sprintf(" %+07.4f\t%+07.4f\t%+07.4f\t%+07.4f\n", mat->GetElement(i,0), mat->GetElement(i,1), mat->GetElement(i,2),  mat->GetElement(i,3) );
+        formattedOutput.append(tmp);
+        tmp.clear();
+    }
 }

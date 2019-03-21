@@ -5,6 +5,8 @@
 #include "transformoperationsplugininterface.h"
 
 class SceneObject;
+class QString;
+class vtkMatrix4x4;
 
 namespace Ui {
 class TransformOperationsWidget;
@@ -35,8 +37,9 @@ private slots:
 private:
     vtkQtMatrixDialog * m_matrixDialog;
     SceneObject *m_selectedObject;
-
     TransformOperationsPluginInterface *m_pluginInterface;
+
+    const void MatrixToString(const vtkMatrix4x4 *mat, QString &formattedOutput );
 
     Ui::TransformOperationsWidget *ui;
 };
