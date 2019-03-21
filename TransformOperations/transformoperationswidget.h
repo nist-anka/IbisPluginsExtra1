@@ -3,16 +3,19 @@
 
 #include <QWidget>
 #include "transformoperationsplugininterface.h"
+#include "vtkSmartPointer.h"
 
 class SceneObject;
 class QString;
+class vtkQtMatrixDialog;
+class vtkTransform;
 class vtkMatrix4x4;
+class vtkLinearTransform;
 
 namespace Ui {
 class TransformOperationsWidget;
 }
 
-class vtkQtMatrixDialog;
 
 class TransformOperationsWidget : public QWidget
 {
@@ -25,12 +28,13 @@ public:
 
 private slots:
 
-    void on_identityPushButton_clicked();
     void on_concat1PushButton_clicked();
     void on_concat2PushButton_clicked();
-    void on_inversePushButton_clicked();
     void on_inputPushButton_clicked();
-    void on_inputConcat2PushButton_clicked();
+    void on_applyConcatOncePushButton_clicked();
+    void on_applyConcatInversePushButton_clicked();
+    void on_applyConcatTwicePushButton_clicked();
+    void on_applyInputInversePushButton_clicked();
     void EditMatrixDialogClosed();
     void UpdateUI();
 
@@ -40,6 +44,15 @@ private:
     TransformOperationsPluginInterface *m_pluginInterface;
 
     const void MatrixToString(const vtkMatrix4x4 *mat, QString &formattedOutput );
+    void UpdateTransforms();
+
+    vtkSmartPointer<vtkTransform> concatenatedOnceTransform;
+    vtkSmartPointer<vtkTransform> concatenatedTwiceTransform;
+    vtkSmartPointer<vtkTransform> inputUsingFirstTransform;
+    vtkSmartPointer<vtkTransform> firstTransformToConcatenateOrInput;
+    vtkSmartPointer<vtkTransform> secondTransformToConcatenate;
+    vtkSmartPointer<vtkTransform> inputTransformInversed;
+    vtkSmartPointer<vtkLinearTransform> concatenatedTransformInverse;
 
     Ui::TransformOperationsWidget *ui;
 };

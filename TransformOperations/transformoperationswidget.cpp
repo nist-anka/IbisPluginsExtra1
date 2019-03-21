@@ -3,7 +3,6 @@
 
 #include "vtkTransform.h"
 #include "vtkMatrix4x4.h"
-#include "vtkSmartPointer.h"
 #include "ibisapi.h"
 #include "guiutilities.h"
 #include "sceneobject.h"
@@ -16,6 +15,13 @@ TransformOperationsWidget::TransformOperationsWidget(QWidget *parent) :
     ui->setupUi(this);
     m_matrixDialog = nullptr;
     m_selectedObject = nullptr;
+    concatenatedOnceTransform = vtkSmartPointer<vtkTransform>::New();
+    concatenatedTwiceTransform = vtkSmartPointer<vtkTransform>::New();
+    firstTransformToConcatenateOrInput = vtkSmartPointer<vtkTransform>::New();
+    secondTransformToConcatenate = vtkSmartPointer<vtkTransform>::New();
+    inputUsingFirstTransform = vtkSmartPointer<vtkTransform>::New();
+    inputTransformInversed = vtkSmartPointer<vtkTransform>::New();
+    concatenatedTransformInverse = vtkSmartPointer<vtkTransform>::New();
 }
 
 TransformOperationsWidget::~TransformOperationsWidget()
@@ -28,45 +34,56 @@ TransformOperationsWidget::~TransformOperationsWidget()
     delete ui;
 }
 
-void TransformOperationsWidget::on_identityPushButton_clicked()
-{
-//    Q_ASSERT(m_selectedObject);
-//    vtkTransform * localTransform = m_selectedObject->GetLocalTransform();
-//    bool readOnly = !m_selectedObject->CanEditTransformManually();
-//    m_matrixDialog = new vtkQtMatrixDialog( readOnly, 0 );
-//    m_matrixDialog->setWindowTitle( "Edit matrix" );
-//    m_matrixDialog->setAttribute( Qt::WA_DeleteOnClose );
-//    m_matrixDialog->SetMatrix( localTransform->GetMatrix() );
-//    m_matrixDialog->show();
-//    connect( m_matrixDialog, SIGNAL(MatrixModified()), m_selectedObject, SLOT(NotifyTransformChanged()) );
-//    connect( m_matrixDialog, SIGNAL(destroyed()), this, SLOT(EditMatrixDialogClosed()) );
-}
-
 void TransformOperationsWidget::on_concat1PushButton_clicked()
 {
-
+    m_matrixDialog = new vtkQtMatrixDialog( false, 0 );
+    m_matrixDialog->setWindowTitle( "Edit matrix" );
+    m_matrixDialog->setAttribute( Qt::WA_DeleteOnClose );
+    m_matrixDialog->SetMatrix( firstTransformToConcatenateOrInput->GetMatrix() );
+    m_matrixDialog->show();
+    connect( m_matrixDialog, SIGNAL(MatrixModified()), this, SLOT(UpdateUI()) );
+    connect( m_matrixDialog, SIGNAL(destroyed()), this, SLOT(EditMatrixDialogClosed()) );
 }
 
 void TransformOperationsWidget::on_concat2PushButton_clicked()
 {
-
+    m_matrixDialog = new vtkQtMatrixDialog( false, 0 );
+    m_matrixDialog->setWindowTitle( "Edit matrix" );
+    m_matrixDialog->setAttribute( Qt::WA_DeleteOnClose );
+    m_matrixDialog->SetMatrix( secondTransformToConcatenate->GetMatrix() );
+    m_matrixDialog->show();
+    connect( m_matrixDialog, SIGNAL(MatrixModified()), this, SLOT(UpdateUI()) );
+    connect( m_matrixDialog, SIGNAL(destroyed()), this, SLOT(EditMatrixDialogClosed()) );
 }
 
-void TransformOperationsWidget::on_inversePushButton_clicked()
-{
-
-}
 
 void TransformOperationsWidget::on_inputPushButton_clicked()
 {
-
+    inputUsingFirstTransform->Identity();
+    inputUsingFirstTransform->SetInput( firstTransformToConcatenateOrInput );
+    inputUsingFirstTransform->Concatenate( secondTransformToConcatenate );
+    UpdateUI();
 }
 
-void TransformOperationsWidget::on_inputConcat2PushButton_clicked()
+void TransformOperationsWidget::on_applyConcatOncePushButton_clicked()
 {
 
 }
 
+void TransformOperationsWidget::on_applyConcatInversePushButton_clicked()
+{
+
+}
+
+void TransformOperationsWidget::on_applyConcatTwicePushButton_clicked()
+{
+
+}
+
+void TransformOperationsWidget::on_applyInputInversePushButton_clicked()
+{
+
+}
 
 void TransformOperationsWidget::SetInterface( TransformOperationsPluginInterface *intface )
 {
@@ -86,9 +103,48 @@ void TransformOperationsWidget::UpdateUI()
     m_selectedObject = ibisAPI->GetCurrentObject();
     if( m_selectedObject == nullptr )
         return;
+    this->UpdateTransforms();
     QString temp;
-    this->MatrixToString( m_selectedObject->GetWorldTransform()->GetMatrix(), temp );
-    ui->baseTextEdit->setText( temp );
+    this->MatrixToString( firstTransformToConcatenateOrInput->GetMatrix(), temp );
+    ui->concat1TextEdit->setText( temp );
+    temp.clear();
+    this->MatrixToString( secondTransformToConcatenate->GetMatrix(), temp );
+    ui->concat2TextEdit->setText( temp );
+    temp.clear();
+    this->MatrixToString( concatenatedOnceTransform->GetMatrix(), temp );
+    ui->concatenated1TextEdit->setText( temp );
+    temp.clear();
+    this->MatrixToString( concatenatedTwiceTransform->GetMatrix(), temp );
+    ui->concatenated2TextEdit->setText( temp );
+    temp.clear();
+    this->MatrixToString( inputUsingFirstTransform->GetMatrix(), temp );
+    ui->baseWithInputConcatenatedTextEdit->setText( temp );
+    temp.clear();
+    this->MatrixToString( inputTransformInversed->GetMatrix(), temp );
+    ui->baseWithInputInversedTextEdit->setText( temp );
+    temp.clear();
+    this->MatrixToString( concatenatedTransformInverse->GetMatrix(), temp );
+    ui->concatenatedInversedTextEdit->setText( temp );
+}
+
+void TransformOperationsWidget::UpdateTransforms()
+{
+    concatenatedOnceTransform->Identity();
+    concatenatedOnceTransform->Concatenate( firstTransformToConcatenateOrInput );
+
+    concatenatedTwiceTransform->Identity();
+    concatenatedTwiceTransform->Concatenate( firstTransformToConcatenateOrInput );
+    concatenatedTwiceTransform->Concatenate( secondTransformToConcatenate );
+
+    inputUsingFirstTransform->Identity();
+    inputUsingFirstTransform->SetInput( firstTransformToConcatenateOrInput );
+    inputUsingFirstTransform->Concatenate( secondTransformToConcatenate );
+
+    inputTransformInversed->Identity();
+    inputTransformInversed->SetInput( concatenatedTwiceTransform );
+    inputTransformInversed->Inverse();
+
+    concatenatedTransformInverse = concatenatedTwiceTransform->GetLinearInverse();
 }
 
 void TransformOperationsWidget::EditMatrixDialogClosed()
