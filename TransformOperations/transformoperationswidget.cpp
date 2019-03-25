@@ -107,22 +107,16 @@ void TransformOperationsWidget::UpdateUI()
     QString temp;
     this->MatrixToString( firstTransformToConcatenateOrInput->GetMatrix(), temp );
     ui->concat1TextEdit->setText( temp );
-    temp.clear();
     this->MatrixToString( secondTransformToConcatenate->GetMatrix(), temp );
     ui->concat2TextEdit->setText( temp );
-    temp.clear();
     this->MatrixToString( concatenatedOnceTransform->GetMatrix(), temp );
     ui->concatenated1TextEdit->setText( temp );
-    temp.clear();
     this->MatrixToString( concatenatedTwiceTransform->GetMatrix(), temp );
     ui->concatenated2TextEdit->setText( temp );
-    temp.clear();
     this->MatrixToString( inputUsingFirstTransform->GetMatrix(), temp );
     ui->baseWithInputConcatenatedTextEdit->setText( temp );
-    temp.clear();
     this->MatrixToString( inputTransformInversed->GetMatrix(), temp );
     ui->baseWithInputInversedTextEdit->setText( temp );
-    temp.clear();
     this->MatrixToString( concatenatedTransformInverse->GetMatrix(), temp );
     ui->concatenatedInversedTextEdit->setText( temp );
 }
@@ -130,17 +124,21 @@ void TransformOperationsWidget::UpdateUI()
 void TransformOperationsWidget::UpdateTransforms()
 {
     concatenatedOnceTransform->Identity();
+    concatenatedOnceTransform->Update();
     concatenatedOnceTransform->Concatenate( firstTransformToConcatenateOrInput );
 
     concatenatedTwiceTransform->Identity();
+    concatenatedTwiceTransform->Update();
     concatenatedTwiceTransform->Concatenate( firstTransformToConcatenateOrInput );
     concatenatedTwiceTransform->Concatenate( secondTransformToConcatenate );
 
     inputUsingFirstTransform->Identity();
+    inputUsingFirstTransform->Update();
     inputUsingFirstTransform->SetInput( firstTransformToConcatenateOrInput );
     inputUsingFirstTransform->Concatenate( secondTransformToConcatenate );
 
     inputTransformInversed->Identity();
+    inputTransformInversed->Update();
     inputTransformInversed->SetInput( concatenatedTwiceTransform );
     inputTransformInversed->Inverse();
 
