@@ -6,6 +6,7 @@
 #include "vtkSmartPointer.h"
 
 class SceneObject;
+class ImageObject;
 class QString;
 class vtkQtMatrixDialog;
 class vtkTransform;
@@ -30,7 +31,6 @@ private slots:
 
     void on_concat1PushButton_clicked();
     void on_concat2PushButton_clicked();
-    void on_inputPushButton_clicked();
     void on_applyConcatOncePushButton_clicked();
     void on_applyConcatInversePushButton_clicked();
     void on_applyConcatTwicePushButton_clicked();
@@ -41,14 +41,16 @@ private slots:
 private:
     vtkQtMatrixDialog * m_matrixDialog;
     SceneObject *m_selectedObject;
+    ImageObject *m_referenceObject;
     TransformOperationsPluginInterface *m_pluginInterface;
 
     const void MatrixToString(const vtkMatrix4x4 *mat, QString &formattedOutput );
     void UpdateTransforms();
+    void CheckReferenceDataObject( );
 
     vtkSmartPointer<vtkTransform> concatenatedOnceTransform;
     vtkSmartPointer<vtkTransform> concatenatedTwiceTransform;
-    vtkSmartPointer<vtkTransform> inputUsingFirstTransform;
+    vtkSmartPointer<vtkTransform> inputUsingconcatenatedTwiceTransform;
     vtkSmartPointer<vtkTransform> firstTransformToConcatenateOrInput;
     vtkSmartPointer<vtkTransform> secondTransformToConcatenate;
     vtkSmartPointer<vtkTransform> inputTransformInversed;
