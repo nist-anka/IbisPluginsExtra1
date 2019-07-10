@@ -27,5 +27,5 @@ SceneObject *NewCursorPluginInterface::CreateObject()
     Q_ASSERT(ibisAPI);
     CursorObject * cursor = CursorObject::New();
     ibisAPI->AddObject( cursor );
-//    cursor->SetIbisAPI( ibisAPI );
+    cursor->Delete();
 }
