@@ -1,1 +1,1 @@
-DeclarePlugin( CursorObject YES  DESCRIPTION "Cursor used on view planes." )
+DeclarePlugin( CursorObject NO  DESCRIPTION "Cursor used on view planes." )
