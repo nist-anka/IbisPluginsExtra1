@@ -35,7 +35,7 @@ QWidget * ReplaceITKImagePluginInterface::CreateFloatingWidget()
     IbisItkFloat3ImageType::PointType origin = refITKimg->GetOrigin();
     IbisItkFloat3ImageType::SpacingType spacing = refITKimg->GetSpacing();
 
-    QString filename = QFileDialog::getOpenFileName( 0, tr("Replacement"), sceneDir, tr("*.mnc") );
+    QString filename = QFileDialog::getOpenFileName( 0, tr("Replacement"), sceneDir, tr("*.mnc"), nullptr, QFileDialog::DontUseNativeDialog );
     typedef itk::ImageFileReader< IbisItkFloat3ImageType > ReaderType;
     ReaderType::Pointer reader = ReaderType::New();
     reader->SetFileName(filename.toUtf8().data());
