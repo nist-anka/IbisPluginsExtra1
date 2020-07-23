@@ -18,10 +18,10 @@ public:
 
     MakeImageObjectPluginInterface();
     ~MakeImageObjectPluginInterface();
-    virtual QString GetPluginName() { return QString("MakeImageObject"); }
-    bool CanRun() { return true; }
-    QString GetMenuEntryString() { return QString("Make an ImageObject"); }
-    QWidget * CreateFloatingWidget();
+    virtual QString GetPluginName() override { return QString("MakeImageObject"); }
+    bool CanRun() override { return true; }
+    QString GetMenuEntryString() override { return QString("Make an ImageObject"); }
+    QWidget * CreateFloatingWidget() override;
 };
 
 #endif

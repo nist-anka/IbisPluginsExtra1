@@ -19,10 +19,10 @@ public:
 
     TransformOperationsPluginInterface();
     ~TransformOperationsPluginInterface();
-    virtual QString GetPluginName() { return QString("TransformOperations"); }
-    bool CanRun() { return true; }
-    QString GetMenuEntryString() { return QString("Testing Operations on Transforms"); }
-    QWidget * CreateFloatingWidget();
+    virtual QString GetPluginName() override { return QString("TransformOperations"); }
+    bool CanRun()  override{ return true; }
+    QString GetMenuEntryString() override { return QString("Testing Operations on Transforms"); }
+    QWidget * CreateFloatingWidget() override;
 
 
 protected:

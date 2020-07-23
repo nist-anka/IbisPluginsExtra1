@@ -18,10 +18,10 @@ public:
 
     ReplaceITKImagePluginInterface();
     ~ReplaceITKImagePluginInterface();
-    virtual QString GetPluginName() { return QString("ReplaceITKImage"); }
-    bool CanRun() { return true; }
-    QString GetMenuEntryString() { return QString("Replace ITK Image"); }
-    QWidget * CreateFloatingWidget();
+    virtual QString GetPluginName() override { return QString("ReplaceITKImage"); }
+    bool CanRun() override { return true; }
+    QString GetMenuEntryString() override { return QString("Replace ITK Image"); }
+    QWidget * CreateFloatingWidget() override;
 };
 
 #endif

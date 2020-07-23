@@ -18,10 +18,10 @@ public:
 
     NewCursorPluginInterface();
     ~NewCursorPluginInterface();
-    virtual QString GetPluginName() { return QString("NewCursor"); }
-    QString GetMenuEntryString() { return QString("Cursor Object"); }
-    SceneObject * CreateObject();
-    virtual bool CanBeActivated();
+    virtual QString GetPluginName() override { return QString("NewCursor"); }
+    QString GetMenuEntryString() override { return QString("Cursor Object"); }
+    SceneObject * CreateObject() override;
+    virtual bool CanBeActivated() override;
 };
 
 #endif

@@ -18,10 +18,10 @@ public:
 
     HideObjectsPluginInterface();
     ~HideObjectsPluginInterface();
-    virtual QString GetPluginName() { return QString("UserObjects"); }
-    bool CanRun() { return true; }
-    QString GetMenuEntryString() { return QString("User Objects"); }
-    QWidget * CreateFloatingWidget();
+    virtual QString GetPluginName() override { return QString("UserObjects"); }
+    bool CanRun() override { return true; }
+    QString GetMenuEntryString() override { return QString("User Objects"); }
+    QWidget * CreateFloatingWidget() override;
 private:
     UserObjects * m_interfaceWidget;
 };

@@ -18,10 +18,10 @@ public:
 
     MoveCutPlanesPluginInterface();
     ~MoveCutPlanesPluginInterface();
-    virtual QString GetPluginName() { return QString("ModifyImage"); }
-    bool CanRun() { return true; }
-    QString GetMenuEntryString() { return QString("Modify ImageObject"); }
-    QWidget * CreateFloatingWidget();
+    virtual QString GetPluginName() override { return QString("ModifyImage"); }
+    bool CanRun() override { return true; }
+    QString GetMenuEntryString() override { return QString("Modify ImageObject"); }
+    QWidget * CreateFloatingWidget() override;
 };
 
 #endif //__MoveCutPlanesPluginInterface_h_
