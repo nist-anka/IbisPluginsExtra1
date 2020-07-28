@@ -45,7 +45,7 @@ void TransformOperationsWidget::on_concat1PushButton_clicked()
     m_matrixDialog->setAttribute( Qt::WA_DeleteOnClose );
     m_matrixDialog->SetMatrix( firstTransformToConcatenateOrInput->GetMatrix() );
     m_matrixDialog->show();
-    connect( m_matrixDialog, SIGNAL(MatrixModified()), this, SLOT(UpdateUI()) );
+    connect( m_matrixDialog, SIGNAL(MatrixModified(vtkMatrix4x4 *)), this, SLOT(UpdateMatrix( vtkMatrix4x4 *)) );
     connect( m_matrixDialog, SIGNAL(destroyed()), this, SLOT(EditMatrixDialogClosed()) );
 }
 
@@ -56,7 +56,7 @@ void TransformOperationsWidget::on_concat2PushButton_clicked()
     m_matrixDialog->setAttribute( Qt::WA_DeleteOnClose );
     m_matrixDialog->SetMatrix( secondTransformToConcatenate->GetMatrix() );
     m_matrixDialog->show();
-    connect( m_matrixDialog, SIGNAL(MatrixModified()), this, SLOT(UpdateUI()) );
+    connect( m_matrixDialog, SIGNAL(MatrixModified(vtkMatrix4x4 *)), this, SLOT(UpdateMatrix( vtkMatrix4x4 *)) );
     connect( m_matrixDialog, SIGNAL(destroyed()), this, SLOT(EditMatrixDialogClosed()) );
 }
 
@@ -101,6 +101,16 @@ void TransformOperationsWidget::SetInterface( TransformOperationsPluginInterface
 {
     m_pluginInterface = intface;
     this->CheckReferenceDataObject();
+    this->UpdateUI();
+}
+
+void TransformOperationsWidget::UpdateMatrix( vtkMatrix4x4 * newMatrix )
+{
+    if( m_selectedObject )
+    {
+        m_selectedObject->GetLocalTransform()->SetMatrix( newMatrix );
+        m_selectedObject->NotifyTransformChanged();
+    }
     this->UpdateUI();
 }
 
@@ -173,7 +183,7 @@ void TransformOperationsWidget::EditMatrixDialogClosed()
     m_matrixDialog = 0;
 }
 
-const void TransformOperationsWidget::MatrixToString(const vtkMatrix4x4 *mat , QString &formattedOutput )
+void TransformOperationsWidget::MatrixToString(const vtkMatrix4x4 *mat , QString &formattedOutput )
 {
     formattedOutput.clear();
     QString tmp;

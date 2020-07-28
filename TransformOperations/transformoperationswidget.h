@@ -36,6 +36,7 @@ private slots:
     void on_applyConcatTwicePushButton_clicked();
     void on_applyInputInversePushButton_clicked();
     void EditMatrixDialogClosed();
+    void UpdateMatrix( vtkMatrix4x4 *);
     void UpdateUI();
 
 private:
@@ -44,7 +45,7 @@ private:
     ImageObject *m_referenceObject;
     TransformOperationsPluginInterface *m_pluginInterface;
 
-    const void MatrixToString(const vtkMatrix4x4 *mat, QString &formattedOutput );
+    void MatrixToString(const vtkMatrix4x4 *mat, QString &formattedOutput );
     void UpdateTransforms();
     void CheckReferenceDataObject( );
 
